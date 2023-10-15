@@ -12,17 +12,23 @@ import streamlit as st
 from helpers import tiktoken_len, search_pinecone, gpt
 import dotenv
 
-dotenv.load_dotenv(dotenv_path='./.env')
+dotenv.load_dotenv(dotenv_path="./.env")
 
 # check environment variables
-if os.getenv('PINECONE_API_KEY') is None:
-    st.error("PINECONE_API_KEY not set. Please set this environment variable and restart the app.")
+if os.getenv("PINECONE_API_KEY") is None:
+    st.error(
+        "PINECONE_API_KEY not set. Please set this environment variable and restart the app."
+    )
     st.stop()
-if os.getenv('PINECONE_ENVIRONMENT') is None:
-    st.error("PINECONE_ENVIRONMENT not set. Please set this environment variable and restart the app.")
+if os.getenv("PINECONE_ENVIRONMENT") is None:
+    st.error(
+        "PINECONE_ENVIRONMENT not set. Please set this environment variable and restart the app."
+    )
     st.stop()
-if os.getenv('OPENAI_API_KEY') is None:
-    st.error("OPENAI_API_KEY not set. Please set this environment variable and restart the app.")
+if os.getenv("OPENAI_API_KEY") is None:
+    st.error(
+        "OPENAI_API_KEY not set. Please set this environment variable and restart the app."
+    )
     st.stop()
 
 # create a title for the app
@@ -51,17 +57,17 @@ with st.expander("Options"):
 
     with col2:
         reply_tokens = st.slider("Reply tokens", 750, max_reply_tokens, 750)
-    
+
 
 # create a submit button
 if st.button("Search"):
     # perform Pinecone search and return the urls and chunks
     urls, chunk_texts, all_chunks = search_pinecone(your_query, num_chunks)
-    
+
     # show urls of the chunks in expanded section
     with st.expander("URLs", expanded=True):
         for url in urls:
-            st.markdown(f"* {url}")    
+            st.markdown(f"* {url}")
 
     # show the chunks in collapsed section
     with st.expander("Chunks"):
@@ -73,7 +79,6 @@ if st.button("Search"):
 
     # chatgpt with article as context
     with st.spinner("Summarizing..."):
-    
         prompt = f"""Answer the following query based on the context below ---: {your_query}
                                                     Do not answer beyond this context!
                                                     ---
@@ -96,4 +101,3 @@ if st.button("Search"):
                 st.write(prompt)
 
             st.balloons()
-

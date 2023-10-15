@@ -6,24 +6,25 @@ import openai
 import requests
 from bs4 import BeautifulSoup
 from retrying import retry
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 @retry(wait_exponential_multiplier=1000, wait_exponential_max=10000)
 def create_embedding(article):
     # vectorize with OpenAI text-emebdding-ada-002
-    embedding = openai.Embedding.create(
-        input=article,
-        model="text-embedding-ada-002"
-    )
-
+    embedding = openai.Embedding.create(input=article, model="text-embedding-ada-002")
+    print(embedding)
     return embedding["data"][0]["embedding"]
 
 
 # OpenAI API key
-openai.api_key = os.getenv('OPENAI_API_KEY')
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # get the Pinecone API key and environment
-pinecone_api = os.getenv('PINECONE_API_KEY')
-pinecone_env = os.getenv('PINECONE_ENVIRONMENT')
+pinecone_api = os.getenv("PINECONE_API_KEY")
+pinecone_env = os.getenv("PINECONE_ENVIRONMENT")
 
 pinecone.init(api_key=pinecone_api, environment=pinecone_env)
 
@@ -37,10 +38,10 @@ else:
     pinecone.create_index("blog-index", 1536)
 
 # set index; must exist
-index = pinecone.Index('blog-index')
+index = pinecone.Index("blog-index")
 
 # URL of the RSS feed to parse
-url = 'https://blog.baeke.info/feed/'
+url = "https://blog.baeke.info/feed/"
 
 # Parse the RSS feed with feedparser
 feed = feedparser.parse(url)
@@ -56,8 +57,8 @@ for i, entry in enumerate(feed.entries[:50]):
     print("Create embedding for entry ", i, " of ", entries)
 
     r = requests.get(entry.link)
-    soup = BeautifulSoup(r.text, 'html.parser')
-    article = soup.find('div', {'class': 'entry-content'}).text
+    soup = BeautifulSoup(r.text, "html.parser")
+    article = soup.find("div", {"class": "entry-content"}).text
 
     # create embedding
     vector = create_embedding(article)
@@ -69,7 +70,3 @@ for i, entry in enumerate(feed.entries[:50]):
 upsert_response = index.upsert(vectors=pinecone_vectors)
 
 print("Vector upload complete.")
-
-
-
-
